@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Smart-list-Calculator</string>
+
+    <!-- Navigare principală -->
+    <string name="nav_lists">Liste Active</string>
+    <string name="nav_products">Catalog Produse</string>
+    <string name="nav_history">Istoric Sesiuni</string>
+    <string name="nav_price_trends">Evoluție Prețuri</string>
+    <string name="nav_profile">Profil &amp; Setări</string>
+
+    <!-- Acțiuni uzuale -->
+    <string name="action_add">Adaugă</string>
+    <string name="action_save">Salvează</string>
+    <string name="action_cancel">Anulează</string>
+    <string name="action_delete">Șterge</string>
+    <string name="action_edit">Modifică</string>
+    <string name="action_share">Trimite pe WhatsApp / Mesaje</string>
+    <string name="action_shopping_mode">Mod Magazin (1 Mână)</string>
+    <string name="action_complete_list">Finalizează Cumpărăturile</string>
+    <string name="action_carry_forward">Transferă Produsele Necumpărate</string>
+    <string name="action_duplicate">Duplică Lista</string>
+    <string name="action_archive">Arhivează</string>
+
+    <!-- Progres & Financiar -->
+    <string name="progress_completed">Completat: %1$d/%2$d (%3$d%%)</string>
+    <string name="total_estimated">Total Estimat: %1$s</string>
+    <string name="total_actual">Cheltuit Efectiv: %1$s</string>
+    <string name="total_remaining">Rămas de Achitat: %1$s</string>
+    <string name="currency_default">RON</string>
+
+    <!-- Unități de măsură -->
+    <string name="unit_pcs">buc</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_g">g</string>
+    <string name="unit_l">L</string>
+    <string name="unit_ml">ml</string>
+    <string name="unit_pack">pachet</string>
+
+    <!-- Autentificare -->
+    <string name="sign_in_google">Conectare cu Google</string>
+    <string name="sign_out">Deconectare</string>
+    <string name="guest_user">Mod Vizitator (Offline Local)</string>
+</resources>

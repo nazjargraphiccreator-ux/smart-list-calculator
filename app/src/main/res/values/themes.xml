@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tema principala: transparenta la start, Compose preia controlul -->
+    <style name="Theme.SmartShoppingList" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+    </style>
+
+    <!-- Tema splash screen (afisata instant la pornire - fara blanc) -->
+    <style name="Theme.SmartShoppingList.Splash" parent="Theme.SmartShoppingList">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>

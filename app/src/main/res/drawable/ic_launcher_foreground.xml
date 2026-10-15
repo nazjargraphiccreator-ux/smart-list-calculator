@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Foreground icon: cos de cumparaturi stilizat (alb pe verde)
+    Dimensiuni: 108x108dp, zona sigura: 66x66dp (centrat)
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Cos cumparaturi -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M36,34 L30,34 C28.9,34 28,34.9 28,36 C28,37.1 28.9,38 30,38 L33.5,38 L38.5,60 C37.1,61 36,62.7 36,64.5 C36,67.5 38.5,70 41.5,70 C44.5,70 47,67.5 47,64.5 C47,63.8 46.8,63.1 46.5,62.5 L63.5,62.5 C63.2,63.1 63,63.8 63,64.5 C63,67.5 65.5,70 68.5,70 C71.5,70 74,67.5 74,64.5 C74,61.5 71.5,59 68.5,59 L39.5,59 L38,52 L71,52 C72,52 72.9,51.3 73.1,50.3 L75.1,40.3 C75.4,38.8 74.2,37.5 72.7,37.5 L37.5,37.5 L36.8,34.5 C36.6,34.2 36.3,34 36,34 Z" />
+
+    <!-- Verificare (checkmark mic) in coltul dreapta jos al cosului -->
+    <path
+        android:fillColor="#A5D6A7"
+        android:pathData="M66,44 L62,48 L60,46 C59.6,45.6 59,45.6 58.6,46 C58.2,46.4 58.2,47 58.6,47.4 L61.3,50.1 C61.5,50.3 61.7,50.4 62,50.4 C62.3,50.4 62.5,50.3 62.7,50.1 L67.4,45.4 C67.8,45 67.8,44.4 67.4,44 C67,43.6 66.4,43.6 66,44 Z" />
+</vector>

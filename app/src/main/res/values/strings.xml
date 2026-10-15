@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">Smart-list-Calculator</string>
+
+    <!-- Navigation -->
+    <string name="nav_lists">Lists</string>
+    <string name="nav_products">Products</string>
+    <string name="nav_history">History</string>
+    <string name="nav_price_trends">Price Trends</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Common Actions -->
+    <string name="action_add">Add</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_share">Share via WhatsApp / Apps</string>
+    <string name="action_shopping_mode">Shopping Mode</string>
+    <string name="action_complete_list">Finish Shopping</string>
+    <string name="action_carry_forward">Carry Forward Unpurchased</string>
+    <string name="action_duplicate">Duplicate List</string>
+    <string name="action_archive">Archive</string>
+
+    <!-- Financial & Progress -->
+    <string name="progress_completed">Completed: %1$d/%2$d (%3$d%%)</string>
+    <string name="total_estimated">Estimated Total: %1$s</string>
+    <string name="total_actual">Actual Spent: %1$s</string>
+    <string name="total_remaining">Remaining to Pay: %1$s</string>
+    <string name="currency_default">RON</string>
+
+    <!-- Units -->
+    <string name="unit_pcs">pcs</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_g">g</string>
+    <string name="unit_l">L</string>
+    <string name="unit_ml">ml</string>
+    <string name="unit_pack">pack</string>
+
+    <!-- Auth -->
+    <string name="sign_in_google">Sign in with Google</string>
+    <string name="sign_out">Sign out</string>
+    <string name="guest_user">Guest Mode (Local Offline)</string>
+</resources>

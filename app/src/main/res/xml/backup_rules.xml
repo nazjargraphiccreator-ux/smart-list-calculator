@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Backup rules: includem DOAR baza de date Room cu listele de cumparaturi.
+    Domeniile neincluse (sharedpref, file, etc.) sunt automat excluse din backup.
+-->
+<full-backup-content>
+    <include domain="database" path="." />
+</full-backup-content>

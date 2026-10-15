@@ -1,0 +1,17 @@
+# Secrete și chei de semnare — NU se commit-uiesc
+keystore.properties
+*.jks
+*.keystore
+local.properties
+
+# Build / IDE
+.gradle/
+build/
+app/build/
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+scratch/
+.kotlin/
