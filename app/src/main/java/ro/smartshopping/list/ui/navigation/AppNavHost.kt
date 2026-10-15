@@ -63,7 +63,9 @@ fun AppNavHost(
                 val viewModel = remember {
                     ListsViewModel(
                         repository = container.shoppingListRepository,
-                        formatShareUseCase = container.formatShareUseCase
+                        formatShareUseCase = container.formatShareUseCase,
+                        loyaltyRepository = container.loyaltyCardRepository,
+                        dealsRepository = container.storeDealsRepository
                     )
                 }
                 ListsScreen(
@@ -75,6 +77,12 @@ fun AppNavHost(
                     },
                     onNavigateToShoppingMode = { listId ->
                         navController.navigate(Screen.ShoppingMode.createRoute(listId))
+                    },
+                    onNavigateToWallet = {
+                        navController.navigate(Screen.LoyaltyWallet.route)
+                    },
+                    onNavigateToAgent = {
+                        navController.navigate(Screen.SmartAgent.route)
                     }
                 )
             }

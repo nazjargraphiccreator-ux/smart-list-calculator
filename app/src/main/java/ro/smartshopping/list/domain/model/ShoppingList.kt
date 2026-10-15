@@ -29,7 +29,10 @@ data class ShoppingList(
     val completionPercentage: Int = 0,
     val estimatedTotal: Double = 0.0,
     val actualTotal: Double = 0.0
-)
+) {
+    val isCompleted: Boolean
+        get() = status == ShoppingListStatus.COMPLETED || completedAt != null
+}
 
 data class FinancialSummary(
     val estimatedTotal: Double,

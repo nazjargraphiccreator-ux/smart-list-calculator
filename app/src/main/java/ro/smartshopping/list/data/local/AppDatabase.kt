@@ -99,6 +99,20 @@ abstract class AppDatabase : RoomDatabase() {
                 val starterCards = listOf(
                     LoyaltyCardEntity(
                         id = UUID.randomUUID().toString(),
+                        storeName = "Metro Militari",
+                        programName = "Metro Companion",
+                        cardNumber = "0192837465521",
+                        barcodeType = BarcodeType.CODE_128,
+                        primaryColorHex = "#002D72",
+                        secondaryColorHex = "#FFD100",
+                        cardHolderName = "Client Metro Militari",
+                        notes = "Bd. Iuliu Maniu 500",
+                        isFavorite = true,
+                        createdAt = System.currentTimeMillis() - 86400000L * 30,
+                        lastScannedAt = System.currentTimeMillis() - 86400000L * 1
+                    ),
+                    LoyaltyCardEntity(
+                        id = UUID.randomUUID().toString(),
                         storeName = "Kaufland Militari",
                         programName = "Kaufland Card",
                         cardNumber = "2800192837461",

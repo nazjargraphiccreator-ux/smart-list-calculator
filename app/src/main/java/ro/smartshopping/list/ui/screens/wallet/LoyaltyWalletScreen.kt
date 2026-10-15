@@ -89,6 +89,7 @@ data class StorePreset(
 )
 
 val ROMANIAN_STORE_PRESETS = listOf(
+    StorePreset("Metro Militari", "Metro Companion", "#002D72", "#FFD100", BarcodeType.CODE_128),
     StorePreset("Kaufland Militari", "Kaufland Card", "#E11A22", "#7A0006", BarcodeType.CODE_128),
     StorePreset("Auchan Militari", "MyClub Auchan", "#D61821", "#0E7535", BarcodeType.CODE_128),
     StorePreset("Lidl", "Lidl Plus", "#0050AA", "#FFCC00", BarcodeType.QR_CODE),
