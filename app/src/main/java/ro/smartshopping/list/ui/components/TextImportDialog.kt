@@ -2,6 +2,7 @@ package ro.smartshopping.list.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,11 +25,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Merge
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -63,6 +65,7 @@ import androidx.compose.ui.window.DialogProperties
 import ro.smartshopping.list.domain.model.UnitOfMeasure
 import ro.smartshopping.list.domain.parser.ParsedShoppingItem
 import ro.smartshopping.list.domain.parser.SmartTextImportParser
+import ro.smartshopping.list.domain.parser.TextImportResult
 import ro.smartshopping.list.ui.theme.SuccessGreenLight
 import java.util.Locale
 
@@ -71,28 +74,56 @@ import java.util.Locale
 fun TextImportDialog(
     parser: SmartTextImportParser,
     onDismiss: () -> Unit,
-    onConfirmImport: (List<ParsedShoppingItem>) -> Unit
+    onConfirmImport: (List<ParsedShoppingItem>) -> Unit,
+    onConfirmMultiStoreImport: ((itemsByStore: Map<String, List<ParsedShoppingItem>>, baseTitle: String) -> Unit)? = null
 ) {
     val clipboardManager = LocalClipboardManager.current
 
-    val sampleWhatsAppText = """
-Lapte 2 bucăți
-Pâine 3 buc
-Ouă 1 cofraj
-Mere 2 kg
-Detergent 1 bucată
-Apă minerală 6 sticle
+    val sampleMultiStoreText = """
+Lista cumpărături 
+
+Piață : 
+
+1. Cartofi 10 kg
+2. Fasole 2kg
+3. Branza capra 
+
+
+Metro:
+
+1. Săpun - 6 buc
+2. Bulion sultan - 4 buc
+3. Samntana ( galetusa ) - 1 buc 
+4. Salam săsesc- 1 buc 
+5. Orez - 1 buc  
+6. Scărița afumata 3kg 
+
+
+Auchan : 
+
+1. Cofrag - 30 oua 
+
+
+Kaufland:
+
+1. File de pui cu susan - 6 
+2. Lapte dulce - 2 
+3. Cascaval 
+4. Iaurt cremosso - 4 buc ( profi )
     """.trimIndent()
 
     var rawText by remember { mutableStateOf("") }
+    var parseResult by remember { mutableStateOf<TextImportResult?>(null) }
     var parsedItems by remember { mutableStateOf<List<ParsedShoppingItem>>(emptyList()) }
     var hasAnalyzed by remember { mutableStateOf(false) }
+    var selectedStoreFilter by remember { mutableStateOf<String?>(null) }
 
-    // If dialog opens and user clicks Analyze
     fun runAnalysis(textToParse: String) {
         val result = parser.parse(textToParse)
+        parseResult = result
         parsedItems = result.items
         hasAnalyzed = true
+        selectedStoreFilter = null
     }
 
     Dialog(
@@ -101,18 +132,18 @@ Apă minerală 6 sticle
     ) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth(0.95f)
-                .fillMaxHeight(0.92f),
+                .fillMaxWidth(0.96f)
+                .fillMaxHeight(0.94f),
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 6.dp
         ) {
             Column(
                 modifier = Modifier
-                    .padding(20.dp)
+                    .padding(18.dp)
                     .fillMaxHeight()
             ) {
-                // Header
+                // Header 2026
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -121,7 +152,7 @@ Apă minerală 6 sticle
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(42.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.primaryContainer),
                             contentAlignment = Alignment.Center
@@ -135,12 +166,12 @@ Apă minerală 6 sticle
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "Import Inteligent Text",
-                                style = MaterialTheme.typography.titleLarge,
+                                text = "Import Inteligent Multi-Magazin 2026",
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "WhatsApp, SMS, Notițe, E-mail",
+                                text = "Piață, Metro, Auchan, Kaufland • Auto-spațiere & note",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -151,7 +182,7 @@ Apă minerală 6 sticle
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 if (!hasAnalyzed || parsedItems.isEmpty()) {
                     // Input View
@@ -161,7 +192,7 @@ Apă minerală 6 sticle
                             onValueChange = { rawText = it },
                             placeholder = {
                                 Text(
-                                    "Lipește aici textul listei:\n\nExemplu:\nLapte 2 bucăți\nPâine 3 buc\nOuă 1 cofraj\nMere 2 kg\nApă minerală 6 sticle"
+                                    "Lipește aici textul cu magazine și produse:\n\nExemplu:\nPiață :\n1. Cartofi 10 kg\n2. Fasole 2kg\n\nMetro:\n1. Săpun - 6 buc\n2. Samntana ( galetusa ) - 1 buc\n\nKaufland:\n1. File de pui cu susan - 6\n2. Lapte dulce - 2"
                                 )
                             },
                             modifier = Modifier
@@ -170,7 +201,7 @@ Apă minerală 6 sticle
                             shape = RoundedCornerShape(16.dp)
                         )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -186,22 +217,22 @@ Apă minerală 6 sticle
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
-                                Text("Lipește din Clipboard")
+                                Text("Lipește Clipboard", fontSize = 13.sp)
                             }
 
                             OutlinedButton(
                                 onClick = {
-                                    rawText = sampleWhatsAppText
+                                    rawText = sampleMultiStoreText
                                 },
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
-                                Text("Exemplu Rapid")
+                                Text("Exemplu 4 Magazine", fontSize = 13.sp)
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     Button(
                         onClick = { runAnalysis(rawText) },
@@ -213,26 +244,92 @@ Apă minerală 6 sticle
                     ) {
                         Icon(Icons.Default.AutoAwesome, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Analizează și Previzualizează")
+                        Text("Analizează și Identifică Magazinele", fontWeight = FontWeight.Bold)
                     }
                 } else {
-                    // Editable Preview View
-                    val duplicatesCount = parsedItems.groupBy { it.name.lowercase().trim() }.count { it.value.size > 1 }
+                    // Preview & Edit View
+                    val currentResult = parseResult
+                    val stores = currentResult?.storesDetected ?: emptyList()
+                    val spaceCorrectionsCount = parsedItems.count { it.spaceCorrectionNote != null }
+                    val duplicatesCount = parsedItems.groupBy { "${it.storeName ?: ""}_${it.name.lowercase().trim()}" }.count { it.value.size > 1 }
                     val totalEstimated = parsedItems.sumOf { it.estimatedLineTotal }
+                    val suggestedTitle = currentResult?.suggestedTitle ?: "Listă Cumpărături"
+
+                    // Multi-Store Filter Chips
+                    if (stores.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .padding(bottom = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            FilterChip(
+                                selected = selectedStoreFilter == null,
+                                onClick = { selectedStoreFilter = null },
+                                label = { Text("Toate (${parsedItems.size})", fontWeight = FontWeight.Bold) }
+                            )
+                            stores.forEach { store ->
+                                val count = parsedItems.count { it.storeName == store }
+                                FilterChip(
+                                    selected = selectedStoreFilter == store,
+                                    onClick = { selectedStoreFilter = if (selectedStoreFilter == store) null else store },
+                                    label = { Text("$store ($count)") },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Storefront, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Space correction intelligence banner
+                    if (spaceCorrectionsCount > 0) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.AutoAwesome,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "⚡ $spaceCorrectionsCount corecții automate de spații aplicate (ex: 2kg ➔ 2 kg, 3kg ➔ 3 kg, săsesc- 1 ➔ săsesc - 1)",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
 
                     // Duplicate warning banner if any
                     if (duplicatesCount > 0) {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(bottom = 10.dp),
+                                .padding(bottom = 8.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
                         ) {
                             Row(
                                 modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
+                                    .fillMaxWidth()
+                                    .padding(10.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -243,7 +340,7 @@ Apă minerală 6 sticle
                                     Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.onTertiaryContainer)
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "Detectate $duplicatesCount produse duplicate în text.",
+                                        text = "$duplicatesCount produse duplicate detectate.",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                                         fontWeight = FontWeight.SemiBold
@@ -256,9 +353,9 @@ Apă minerală 6 sticle
                                     shape = RoundedCornerShape(10.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
                                 ) {
-                                    Icon(Icons.Default.Merge, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Icon(Icons.Default.Merge, contentDescription = null, modifier = Modifier.size(14.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Combină", fontSize = 12.sp)
+                                    Text("Combină", fontSize = 11.sp)
                                 }
                             }
                         }
@@ -267,47 +364,51 @@ Apă minerală 6 sticle
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 8.dp),
+                            .padding(bottom = 6.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val visibleItems = if (selectedStoreFilter == null) parsedItems else parsedItems.filter { it.storeName == selectedStoreFilter }
                         Text(
-                            text = "${parsedItems.size} produse identificate (editabile)",
+                            text = "${visibleItems.size} produse identificate (editabile)",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
                         TextButton(onClick = { hasAnalyzed = false }) {
-                            Text("Modifică textul sursă")
+                            Text("Modifică textul sursă", fontSize = 12.sp)
                         }
                     }
 
                     // Editable Items List
+                    val visibleItemsWithIndices = parsedItems.mapIndexed { index, item -> index to item }
+                        .filter { selectedStoreFilter == null || it.second.storeName == selectedStoreFilter }
+
                     LazyColumn(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        itemsIndexed(parsedItems, key = { _, item -> item.id }) { index, item ->
+                        itemsIndexed(visibleItemsWithIndices, key = { _, pair -> pair.second.id }) { _, (originalIndex, item) ->
                             EditableParsedItemRow(
                                 item = item,
                                 onUpdate = { updated ->
                                     val newList = parsedItems.toMutableList()
-                                    newList[index] = updated
+                                    newList[originalIndex] = updated
                                     parsedItems = newList
                                 },
                                 onDelete = {
                                     val newList = parsedItems.toMutableList()
-                                    newList.removeAt(index)
+                                    newList.removeAt(originalIndex)
                                     parsedItems = newList
                                 }
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     HorizontalDivider()
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // Summary Bar
+                    // Summary & Multi-store Import Actions
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -326,13 +427,52 @@ Apă minerală 6 sticle
                                 color = SuccessGreenLight
                             )
                         }
+                    }
 
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Buttons
+                    val itemsByStore = parsedItems.groupBy { it.storeName ?: "General" }
+                    if (stores.size > 1 && onConfirmMultiStoreImport != null) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Button(
+                                onClick = { onConfirmMultiStoreImport(itemsByStore, suggestedTitle) },
+                                shape = RoundedCornerShape(14.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(46.dp)
+                            ) {
+                                Icon(Icons.Default.Storefront, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Creează ${stores.size} Liste Separate pe Magazine", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+
+                            OutlinedButton(
+                                onClick = { onConfirmImport(parsedItems) },
+                                shape = RoundedCornerShape(14.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(44.dp)
+                            ) {
+                                Icon(Icons.Default.ShoppingBag, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("1 Singură Listă Grupată (${parsedItems.size} produse)", fontSize = 13.sp)
+                            }
+                        }
+                    } else {
                         Button(
                             onClick = { onConfirmImport(parsedItems) },
                             shape = RoundedCornerShape(14.dp),
-                            modifier = Modifier.height(48.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
                         ) {
-                            Text("Confirmă și Importă (${parsedItems.size})", fontWeight = FontWeight.Bold)
+                            Icon(Icons.Default.ShoppingBag, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Confirmă și Importă (${parsedItems.size} produse)", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -360,35 +500,90 @@ fun EditableParsedItemRow(
         )
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            // Row 1: Name and Category badge and Delete button
+            // Row 1: Store & Space correction Badges (if present)
             Row(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
-                    value = item.name,
-                    onValueChange = { newName ->
-                        onUpdate(item.copy(name = newName))
-                    },
-                    label = { Text("Denumire produs") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f)
-                )
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (!item.storeName.isNullOrBlank()) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Text(
+                                text = "🏪 ${item.storeName}",
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                    if (!item.spaceCorrectionNote.isNullOrBlank()) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer
+                        ) {
+                            Text(
+                                text = "⚡ ${item.spaceCorrectionNote}",
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                    }
+                }
 
-                IconButton(onClick = onDelete) {
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(28.dp)
+                ) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Șterge",
-                        tint = MaterialTheme.colorScheme.error
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
 
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Row 2: Name Input
+            OutlinedTextField(
+                value = item.name,
+                onValueChange = { newName ->
+                    onUpdate(item.copy(name = newName))
+                },
+                label = { Text("Denumire produs") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Optional Row: Notes (if present in original text like "( galetusa )" or "( profi )")
+            if (!item.notes.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = item.notes,
+                    onValueChange = { newNote ->
+                        onUpdate(item.copy(notes = newNote.ifBlank { null }))
+                    },
+                    label = { Text("Notă / Ambalaj special") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Row 2: Quantity Stepper, Unit Dropdown, Unit Price, Line Total
+            // Row 3: Quantity Stepper, Unit Dropdown, Unit Price, Line Total
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -482,7 +677,7 @@ fun EditableParsedItemRow(
                 )
             }
 
-            // Row 3: Category badge & total calculated
+            // Row 4: Category badge & total calculated
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

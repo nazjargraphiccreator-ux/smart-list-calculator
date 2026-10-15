@@ -134,11 +134,75 @@ class ListsViewModel(
                     actualUnitPrice = null,
                     isPurchased = false,
                     isInCart = false,
-                    category = product.category
+                    category = product.category,
+                    notes = parsed.notes,
+                    storeName = parsed.storeName
                 )
             }
             repository.addItems(newItems)
             onCreated(listId)
+        }
+    }
+
+    fun createMultiStoreLists(
+        itemsByStore: Map<String, List<ParsedShoppingItem>>,
+        baseTitle: String,
+        productRepository: ProductRepository,
+        onCreated: (firstListId: String) -> Unit
+    ) {
+        viewModelScope.launch {
+            var firstCreatedListId: String? = null
+
+            for ((store, storeItems) in itemsByStore) {
+                val listName = if (baseTitle.isNotBlank() && baseTitle != "Listă Cumpărături") {
+                    "$baseTitle - $store"
+                } else {
+                    "Cumpărături $store"
+                }
+
+                val listId = repository.createList(name = listName)
+                repository.updateStoreAndBudget(
+                    id = listId,
+                    storeName = store,
+                    storeAddress = null,
+                    lat = null,
+                    lng = null,
+                    budget = null,
+                    receiptTotal = null
+                )
+
+                if (firstCreatedListId == null) {
+                    firstCreatedListId = listId
+                }
+
+                val newItems = storeItems.map { parsed ->
+                    val product = productRepository.findOrCreateProduct(
+                        name = parsed.name,
+                        category = parsed.category,
+                        defaultUnit = parsed.unit,
+                        estimatedPrice = parsed.unitPrice
+                    )
+                    ShoppingListItem(
+                        id = UUID.randomUUID().toString(),
+                        shoppingListId = listId,
+                        productId = product.id,
+                        productNameSnapshot = product.name,
+                        quantity = parsed.quantity,
+                        unit = parsed.unit,
+                        packageCount = parsed.packageCount,
+                        estimatedUnitPrice = parsed.unitPrice ?: product.lastKnownPrice,
+                        actualUnitPrice = null,
+                        isPurchased = false,
+                        isInCart = false,
+                        category = product.category,
+                        notes = parsed.notes,
+                        storeName = store
+                    )
+                }
+                repository.addItems(newItems)
+            }
+
+            firstCreatedListId?.let { onCreated(it) }
         }
     }
 
@@ -314,6 +378,17 @@ fun ListsScreen(
                     onCreated = { newListId ->
                         showImportDialog = false
                         onNavigateToListDetail(newListId)
+                    }
+                )
+            },
+            onConfirmMultiStoreImport = { itemsByStore, baseTitle ->
+                viewModel.createMultiStoreLists(
+                    itemsByStore = itemsByStore,
+                    baseTitle = baseTitle,
+                    productRepository = productRepository,
+                    onCreated = { firstListId ->
+                        showImportDialog = false
+                        onNavigateToListDetail(firstListId)
                     }
                 )
             }

@@ -148,16 +148,57 @@ Spune adio teancului de carduri de plastic din portofel la cumpărături:
 
 ### 🚀 4. Alte Funcționalități Integrate
 * **Flux de Cumpărături în 3 Stadii**: `De Căutat` ➔ `În Coș` ➔ `Achiziționat / Plătit`.
-* **Smart Text Parser**: Copiază o listă simplă din WhatsApp sau notițe și aplicația o împarte automat în produse cu cantități și unități.
 * **Partajare Instant WhatsApp**: Trimite lista aranjată cu bifă către partenerul de viață sau colegi direct pe WhatsApp.
 * **Sincronizare Google Opțională**: Pentru utilizatorii care doresc și backup securizat în contul propriu Google Firebase.
+
+---
+
+### 🧠 5. AI Smart Multi-Store Import & Corector Automat de Spații (Noutate 2026)
+Aplicația include un parser lingvistic avansat adaptat limbii române, capabil să citească liste brute din WhatsApp, Notițe, SMS sau clipboard și să le organizeze inteligent:
+* **Fără Liste Predefinite**: Aplicația pornește curată, oferind libertate completă utilizatorului.
+* **Segmentare Automată pe Magazine**: Recunoaște antetele de magazine (`Piață :`, `Metro:`, `Auchan :`, `Kaufland:`, `Lidl:`, `Carrefour:` etc.) și asociază instant fiecare articol magazinului corespunzător.
+* **Identificare și Corectare Automată a Spațiilor Lipsă**:
+  * Cifre lipite de unități de măsură: `2kg` ➔ `2 kg`, `3kg` ➔ `3 kg`, `500g` ➔ `500 g`.
+  * Liniuțe de despărțire fără spații: `săsesc- 1` ➔ `săsesc - 1`, `Lapte-2` ➔ `Lapte - 2`.
+* **Extragere Note & Ambalaje Speciale**: Extrage automat detaliile dintre paranteze (ex: `( galetusa )` ➔ Notă: *Găletușă*, `( profi )` ➔ Notă: *profi*, `Cofrag - 30 oua` ➔ *Cofraj 30 buc*).
+* **Dicționar Românesc Extins de Supermarket**: Normalizare diacritice și clasificări automate pe categorii (*Lactate*, *Carne & Mezeluri*, *Fructe & Legume*, *Alimente de bază*, *Curățenie*).
+* **Flexibilitate la Import (1-Tap)**:
+  * 🏬 **Opțiunea 1**: *Creează liste separate pe magazine* (creează 4 liste distincte: Piață, Metro, Auchan, Kaufland).
+  * 🛒 **Opțiunea 2**: *Creează 1 singură listă unificată grupată* (toate articolele într-o listă, etichetate cu magazinul lor).
+
+#### Exemplu Real Testat & Suportat:
+```text
+Lista cumpărături 
+
+Piață : 
+1. Cartofi 10 kg
+2. Fasole 2kg
+3. Branza capra 
+
+Metro:
+1. Săpun - 6 buc
+2. Bulion sultan - 4 buc
+3. Samntana ( galetusa ) - 1 buc 
+4. Salam săsesc- 1 buc 
+5. Orez - 1 buc  
+6. Scărița afumata 3kg 
+
+Auchan : 
+1. Cofrag - 30 oua 
+
+Kaufland:
+1. File de pui cu susan - 6 
+2. Lapte dulce - 2 
+3. Cascaval 
+4. Iaurt cremosso - 4 buc ( profi )
+```
 
 ---
 
 ## 📦 Instalare Rapidă pe Dispozitiv Android
 
 Pachetul de instalare final optimizat și semnat este gata în rădăcina proiectului:
-📂 **`Smart-list-Calculator-Release-2026.apk`** *(2.77 MB)*
+📂 **`Smart-list-Calculator-Release-2026.apk`** *(3.76 MB)*
 
 ### Opțiunea 1: Instalare Directă din Telefon (Recomandat)
 1. Descarcă fișierul `Smart-list-Calculator-Release-2026.apk` pe telefonul tău Android.
@@ -211,7 +252,7 @@ ro.smartshopping.list/
 
 ## 🧪 Rulare Teste & Compilare din Cod Sursă
 
-Aplicația beneficiază de o suită completă de 26 de teste unitare automate:
+Aplicația beneficiază de o suită completă de 28 de teste unitare automate (100% passing):
 
 ```bash
 # Rulare toate testele unitare

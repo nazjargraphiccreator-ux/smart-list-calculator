@@ -95,37 +95,6 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                 db.productDao().insertProducts(products)
 
-                // Starter Active List: Cumpărături Săptămânale
-                val list1Id = UUID.randomUUID().toString()
-                val list1 = ShoppingListEntity(
-                    id = list1Id,
-                    ownerId = null,
-                    name = "Cumpărături Săptămânale",
-                    status = ShoppingListStatus.ACTIVE,
-                    currency = "RON",
-                    shoppingDate = System.currentTimeMillis() + 86400000L,
-                    notes = "Supermarket Kaufland / Mega Image",
-                    createdAt = System.currentTimeMillis() - 3600000L,
-                    updatedAt = System.currentTimeMillis(),
-                    completedAt = null
-                )
-                db.shoppingListDao().insertList(list1)
-
-                val items1 = listOf(
-                    ShoppingListItemEntity(UUID.randomUUID().toString(), list1Id, p1Id, "Lapte Zuzu 3.5%", 2.0, UnitOfMeasure.L, 7.50, 7.50, true, "Lactate", null, System.currentTimeMillis() - 2000L, System.currentTimeMillis() - 1000L),
-                    ShoppingListItemEntity(UUID.randomUUID().toString(), list1Id, p2Id, "Pâine Toast Integrală", 3.0, UnitOfMeasure.PCS, 4.00, null, false, "Panificație", null, System.currentTimeMillis() - 2000L, null),
-                    ShoppingListItemEntity(UUID.randomUUID().toString(), list1Id, p3Id, "Mere Idared", 2.0, UnitOfMeasure.KG, 6.00, null, false, "Fructe & Legume", null, System.currentTimeMillis() - 2000L, null),
-                    ShoppingListItemEntity(UUID.randomUUID().toString(), list1Id, p4Id, "Ouă Mărimea M (10 buc)", 1.0, UnitOfMeasure.PACK, 14.50, null, false, "Lactate & Ouă", null, System.currentTimeMillis() - 2000L, null)
-                )
-                db.shoppingListItemDao().insertItems(items1)
-
-                // Starter Price Record for historical charts
-                val priceRecords = listOf(
-                    PriceRecordEntity(UUID.randomUUID().toString(), p1Id, list1Id, 7.50, 2.0, UnitOfMeasure.L, "RON", "Kaufland", null, PriceSourceType.CONFIRMED_PURCHASE, System.currentTimeMillis() - 86400000L * 7),
-                    PriceRecordEntity(UUID.randomUUID().toString(), p1Id, list1Id, 7.80, 2.0, UnitOfMeasure.L, "RON", "Mega Image", null, PriceSourceType.CONFIRMED_PURCHASE, System.currentTimeMillis())
-                )
-                db.priceRecordDao().insertPriceRecords(priceRecords)
-
                 // Starter Loyalty Cards for Romanian Supermarkets (Militari & General)
                 val starterCards = listOf(
                     LoyaltyCardEntity(
