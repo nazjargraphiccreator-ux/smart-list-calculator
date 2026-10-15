@@ -148,7 +148,11 @@ Spune adio teancului de carduri de plastic din portofel la cumpărături:
 
 ### 🚀 4. Alte Funcționalități Integrate
 * **Flux de Cumpărături în 3 Stadii**: `De Căutat` ➔ `În Coș` ➔ `Achiziționat / Plătit`.
-* **Partajare Instant WhatsApp**: Trimite lista aranjată cu bifă către partenerul de viață sau colegi direct pe WhatsApp.
+* **📲 Trimitere pe WhatsApp la un Număr Specific (Cu Iconițe & Doar ce a rămas de cumpărat)**:
+  * Trimiți cu un singur tap direct către numărul dorit (ex: partener, soție, coleg de apartament) fără să ieși din aplicație.
+  * **Iconițe Inteligente per Produs & Categorie**: Fiecare articol are iconița specifică (🥛 Lactate, 🧀 Brânzeturi, 🥚 Ouă, 🥖 Pâine, 🥩 Carne, 🍗 Pui, 🥔 Cartofi, 🍌 Fructe, ☕ Cafea, 💧 Apă, 🫧 Curățenie).
+  * **Filtrare Automată**: Trimite exclusiv produsele rămase de cumpărat, excluzând ce ai bifat deja la casă.
+  * **Contacte Rapide Salvate**: Memorează numerele frecvente (`💍 Soție`, `🏠 Acasă`, `🤝 Partener`) pentru trimitere instantanee la următoarele sesiuni de cumpărături.
 * **Sincronizare Google Opțională**: Pentru utilizatorii care doresc și backup securizat în contul propriu Google Firebase.
 
 ---
