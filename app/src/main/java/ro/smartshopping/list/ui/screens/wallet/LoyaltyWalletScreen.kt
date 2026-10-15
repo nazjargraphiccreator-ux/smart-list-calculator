@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
@@ -89,13 +90,13 @@ data class StorePreset(
 )
 
 val ROMANIAN_STORE_PRESETS = listOf(
-    StorePreset("Metro Militari", "Metro Companion", "#002D72", "#FFD100", BarcodeType.CODE_128),
-    StorePreset("Kaufland Militari", "Kaufland Card", "#E11A22", "#7A0006", BarcodeType.CODE_128),
+    StorePreset("Kaufland Militari Residence", "Kaufland Card", "#E11A22", "#7A0006", BarcodeType.CODE_128),
+    StorePreset("Lidl Militari Residence", "Lidl Plus", "#0050AA", "#FFCC00", BarcodeType.QR_CODE),
     StorePreset("Auchan Militari", "MyClub Auchan", "#D61821", "#0E7535", BarcodeType.CODE_128),
-    StorePreset("Lidl", "Lidl Plus", "#0050AA", "#FFCC00", BarcodeType.QR_CODE),
+    StorePreset("Penny Chiajna", "Penny Card", "#E30613", "#FFCC00", BarcodeType.CODE_128),
+    StorePreset("Metro Militari", "Metro Companion", "#002D72", "#FFD100", BarcodeType.CODE_128),
+    StorePreset("Mega Image Militari", "Connect Card", "#E2001A", "#1A3B8B", BarcodeType.CODE_128),
     StorePreset("Carrefour", "Act For Good", "#004E98", "#E63946", BarcodeType.CODE_128),
-    StorePreset("Mega Image", "Connect Card", "#E2001A", "#1A3B8B", BarcodeType.CODE_128),
-    StorePreset("Penny", "Penny Card", "#E30613", "#FFCC00", BarcodeType.CODE_128),
     StorePreset("Catena", "Card Catena", "#008000", "#004D00", BarcodeType.CODE_128),
     StorePreset("Dr. Max", "Card Fidelitate", "#009640", "#E84E1B", BarcodeType.CODE_128)
 )
@@ -103,7 +104,8 @@ val ROMANIAN_STORE_PRESETS = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoyaltyWalletScreen(
-    viewModel: LoyaltyWalletViewModel
+    viewModel: LoyaltyWalletViewModel,
+    onNavigateBackToList: (() -> Unit)? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val displayedCards = if (uiState.showOnlyFavorites) uiState.favoriteCards else uiState.cards
@@ -111,6 +113,16 @@ fun LoyaltyWalletScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                navigationIcon = {
+                    if (onNavigateBackToList != null) {
+                        IconButton(onClick = onNavigateBackToList) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Înapoi la Listă"
+                            )
+                        }
+                    }
+                },
                 title = {
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {

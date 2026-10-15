@@ -1,8 +1,11 @@
 package ro.smartshopping.list.ui.navigation
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -12,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import ro.smartshopping.list.di.AppContainer
+import ro.smartshopping.list.ui.components.ActiveListFloatingBar
 import ro.smartshopping.list.ui.components.BottomNavBar
 import ro.smartshopping.list.ui.screens.analytics.PriceTrendsScreen
 import ro.smartshopping.list.ui.screens.analytics.PriceTrendsViewModel
@@ -36,6 +40,17 @@ fun AppNavHost(
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry.value?.destination?.route
 
+    val activeListId by container.activeSessionManager.activeListId.collectAsState()
+    val activeListName by container.activeSessionManager.activeListName.collectAsState()
+    val activeStoreName by container.activeSessionManager.activeStoreName.collectAsState()
+    val checkedCount by container.activeSessionManager.checkedCount.collectAsState()
+    val totalCount by container.activeSessionManager.totalCount.collectAsState()
+    val totalAmount by container.activeSessionManager.totalAmount.collectAsState()
+
+    val isAlreadyInList = currentRoute?.startsWith("list_detail") == true ||
+            currentRoute?.startsWith("shopping_mode") == true ||
+            currentRoute?.startsWith("pre_payment") == true
+
     val shouldShowBottomBar = currentRoute in listOf(
         Screen.Lists.route,
         Screen.SmartAgent.route,
@@ -49,8 +64,33 @@ fun AppNavHost(
     Scaffold(
         modifier = modifier,
         bottomBar = {
-            if (shouldShowBottomBar) {
-                BottomNavBar(navController = navController)
+            Column {
+                ActiveListFloatingBar(
+                    visible = activeListId != null && !isAlreadyInList,
+                    listName = activeListName ?: "Lista Curentă",
+                    storeName = activeStoreName,
+                    checkedCount = checkedCount,
+                    totalCount = totalCount,
+                    totalAmount = totalAmount,
+                    onReturnToList = {
+                        activeListId?.let { id ->
+                            navController.navigate(Screen.ListDetail.createRoute(id)) {
+                                popUpTo(Screen.Lists.route) { saveState = true }
+                                launchSingleTop = true
+                            }
+                        }
+                    },
+                    onDismiss = {
+                        container.activeSessionManager.clear()
+                    }
+                )
+
+                if (shouldShowBottomBar) {
+                    BottomNavBar(
+                        navController = navController,
+                        activeListId = activeListId
+                    )
+                }
             }
         }
     ) { innerPadding ->
@@ -110,7 +150,18 @@ fun AppNavHost(
                     )
                 }
                 ro.smartshopping.list.ui.screens.wallet.LoyaltyWalletScreen(
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    onNavigateBackToList = {
+                        val activeId = activeListId
+                        if (activeId != null) {
+                            navController.navigate(Screen.ListDetail.createRoute(activeId)) {
+                                popUpTo(Screen.Lists.route) { saveState = true }
+                                launchSingleTop = true
+                            }
+                        } else {
+                            navController.popBackStack()
+                        }
+                    }
                 )
             }
 
@@ -173,12 +224,19 @@ fun AppNavHost(
                 ListDetailScreen(
                     viewModel = viewModel,
                     parser = container.textImportParser,
+                    activeSessionManager = container.activeSessionManager,
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToShoppingMode = {
                         navController.navigate(Screen.ShoppingMode.createRoute(listId))
                     },
                     onNavigateToPrePayment = {
                         navController.navigate(Screen.PrePaymentCalculator.createRoute(listId))
+                    },
+                    onNavigateToWallet = {
+                        navController.navigate(Screen.LoyaltyWallet.route)
+                    },
+                    onNavigateToAgent = {
+                        navController.navigate(Screen.SmartAgent.route)
                     }
                 )
             }
@@ -202,6 +260,7 @@ fun AppNavHost(
                 }
                 ShoppingModeScreen(
                     viewModel = viewModel,
+                    activeSessionManager = container.activeSessionManager,
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToPrePayment = {
                         navController.navigate(Screen.PrePaymentCalculator.createRoute(listId))

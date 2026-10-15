@@ -39,18 +39,19 @@ class SmartDiscountAgentTest {
 
     @Test
     fun testFindDealAndAisleLocationForKauflandAndAuchanMilitari() = runBlocking {
-        // Lapte is available in both Kaufland and Auchan Militari
+        // Lapte Zuzu is available in Kaufland Militari Residence (Str. Rezervelor 64)
         val kDeal = dealsRepository.findDealForProduct("Lapte Zuzu 3.5%", "Kaufland")
         assertNotNull(kDeal)
-        assertEquals("Kaufland Militari", kDeal!!.storeName)
+        assertTrue(kDeal!!.storeName.contains("Kaufland Militari Residence"))
         assertEquals(6.29, kDeal.discountPrice, 0.001)
         assertTrue(kDeal.aisleLocation.contains("Raion Lactate"))
 
-        val aDeal = dealsRepository.findDealForProduct("Lapte Zuzu 3.5%", "Auchan")
+        // Cafea Lavazza is available in Auchan Militari (Centrul Comercial Militari)
+        val aDeal = dealsRepository.findDealForProduct("Cafea Boabe Lavazza", "Auchan")
         assertNotNull(aDeal)
-        assertEquals("Auchan Militari", aDeal!!.storeName)
-        assertEquals(6.49, aDeal.discountPrice, 0.001)
-        assertTrue(aDeal.aisleLocation.contains("Raion Lactate"))
+        assertTrue(aDeal!!.storeName.contains("Auchan Militari"))
+        assertEquals(43.99, aDeal.discountPrice, 0.001)
+        assertTrue(aDeal.aisleLocation.contains("Aleea Centrală"))
     }
 
     @Test

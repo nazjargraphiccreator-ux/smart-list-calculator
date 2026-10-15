@@ -82,4 +82,8 @@ class AppContainer(private val context: Context) {
             storeDealsRepository = storeDealsRepository
         )
     }
+
+    val activeSessionManager: ro.smartshopping.list.data.session.ActiveShoppingSessionManager by lazy {
+        ro.smartshopping.list.data.session.ActiveShoppingSessionManager()
+    }
 }

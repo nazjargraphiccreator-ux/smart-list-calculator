@@ -403,6 +403,9 @@ fun ListDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToShoppingMode: () -> Unit,
     onNavigateToPrePayment: () -> Unit,
+    activeSessionManager: ro.smartshopping.list.data.session.ActiveShoppingSessionManager? = null,
+    onNavigateToWallet: (() -> Unit)? = null,
+    onNavigateToAgent: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -417,6 +420,22 @@ fun ListDetailScreen(
     LaunchedEffect(state.items) {
         val names = state.items.map { it.productNameSnapshot }
         matchingDeals = viewModel.storeDealsRepository?.getDealsMatchingList(names) ?: emptyList()
+    }
+
+    // Sync with ActiveShoppingSessionManager so all tabs know which list is active
+    LaunchedEffect(state.list, state.items, state.summary) {
+        val currentList = state.list
+        if (currentList != null) {
+            val checked = state.items.count { it.isPurchased || it.isInCart }
+            activeSessionManager?.updateActiveList(
+                listId = currentList.id,
+                name = currentList.name,
+                store = currentList.storeName,
+                checked = checked,
+                total = state.items.size,
+                amount = if (state.summary.actualSpent > 0.0) state.summary.actualSpent else state.summary.estimatedTotal
+            )
+        }
     }
 
     var newItemName by remember { mutableStateOf("") }

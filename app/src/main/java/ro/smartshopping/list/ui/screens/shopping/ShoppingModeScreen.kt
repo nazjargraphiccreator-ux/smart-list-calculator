@@ -86,6 +86,7 @@ fun ShoppingModeScreen(
     onNavigateBack: () -> Unit,
     onNavigateToPrePayment: () -> Unit,
     onNavigateToWallet: () -> Unit = {},
+    activeSessionManager: ro.smartshopping.list.data.session.ActiveShoppingSessionManager? = null,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -99,6 +100,22 @@ fun ShoppingModeScreen(
     LaunchedEffect(state.items) {
         val names = state.items.map { it.productNameSnapshot }
         matchingDeals = viewModel.storeDealsRepository?.getDealsMatchingList(names) ?: emptyList()
+    }
+
+    // Keep activeSessionManager in sync
+    LaunchedEffect(state.list, state.items, state.summary) {
+        val currentList = state.list
+        if (currentList != null) {
+            val checked = state.items.count { it.isPurchased || it.isInCart }
+            activeSessionManager?.updateActiveList(
+                listId = currentList.id,
+                name = currentList.name,
+                store = currentList.storeName,
+                checked = checked,
+                total = state.items.size,
+                amount = if (state.summary.actualSpent > 0.0) state.summary.actualSpent else state.summary.estimatedTotal
+            )
+        }
     }
 
     // Sorting: TO_BUY first, then IN_CART, then PURCHASED at bottom

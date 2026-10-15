@@ -5,8 +5,6 @@ import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +26,10 @@ sealed class BottomNavItem(val screen: Screen, val icon: ImageVector) {
 }
 
 @Composable
-fun BottomNavBar(navController: NavController) {
+fun BottomNavBar(
+    navController: NavController,
+    activeListId: String? = null
+) {
     val items = listOf(
         BottomNavItem.Lists,
         BottomNavItem.SmartAgent,
@@ -45,13 +46,27 @@ fun BottomNavBar(navController: NavController) {
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         items.forEach { item ->
-            val selected = currentRoute == item.screen.route
+            val selected = currentRoute == item.screen.route ||
+                    (item == BottomNavItem.Lists && (currentRoute?.startsWith("list_detail") == true || currentRoute?.startsWith("shopping_mode") == true))
+
+            val labelText = if (item == BottomNavItem.Lists && activeListId != null && currentRoute != Screen.Lists.route) {
+                "Listă Activă"
+            } else {
+                item.screen.titleRo
+            }
+
             NavigationBarItem(
-                icon = { Icon(item.icon, contentDescription = item.screen.titleRo) },
-                label = { Text(item.screen.titleRo, style = MaterialTheme.typography.labelSmall) },
+                icon = { Icon(item.icon, contentDescription = labelText) },
+                label = { Text(labelText, style = MaterialTheme.typography.labelSmall) },
                 selected = selected,
                 onClick = {
-                    if (currentRoute != item.screen.route) {
+                    if (item == BottomNavItem.Lists && activeListId != null && currentRoute != Screen.Lists.route && currentRoute?.startsWith("list_detail") != true) {
+                        navController.navigate(Screen.ListDetail.createRoute(activeListId)) {
+                            popUpTo(Screen.Lists.route) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    } else if (currentRoute != item.screen.route) {
                         navController.navigate(item.screen.route) {
                             popUpTo(Screen.Lists.route) {
                                 saveState = true

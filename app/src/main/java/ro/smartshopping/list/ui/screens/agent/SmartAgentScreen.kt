@@ -21,9 +21,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Navigation
@@ -247,6 +249,19 @@ fun SmartAgentScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = {
+                        val targetId = selectedListId ?: activeLists.firstOrNull()?.id
+                        if (targetId != null) {
+                            onNavigateToListDetail(targetId)
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Înapoi la Listă"
+                        )
+                    }
+                },
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Image(
@@ -258,8 +273,8 @@ fun SmartAgentScreen(
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
-                            Text("Smart-list-Calculator", fontWeight = FontWeight.Bold, fontSize = 17.sp)
-                            Text("Agent Inteligent • Kaufland & Auchan Militari", fontSize = 11.sp, color = SuccessGreenLight)
+                            Text("Smart-list-Calculator", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Text("Militari Residence & Chiajna • Oferte Reale", fontSize = 11.sp, color = SuccessGreenLight)
                         }
                     }
                 },
@@ -276,6 +291,43 @@ fun SmartAgentScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            // Active List Fast-Return Banner
+            val currentSelectedList = activeLists.find { it.id == selectedListId } ?: activeLists.firstOrNull()
+            if (currentSelectedList != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .clickable { onNavigateToListDetail(currentSelectedList.id) },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.ShoppingCart, contentDescription = null, tint = Color(0xFF00FF88), modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Listă Curentă: ${currentSelectedList.name}",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        }
+                        Text(
+                            text = "Înapoi la Listă ➜",
+                            color = Color(0xFF00FF88),
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 11.5.sp
+                        )
+                    }
+                }
+            }
             // List Selector Chips if multiple lists exist
             if (activeLists.isNotEmpty()) {
                 LazyRow(
@@ -744,9 +796,28 @@ fun DealsCatalogTab(
     onFilterChange: (String) -> Unit,
     onAddDeal: (StoreDeal) -> Unit
 ) {
-    val storeOptions = listOf("Toate", "Kaufland Militari", "Auchan Militari")
-    val filteredDeals = deals.filter {
-        if (currentFilter == "Toate") true else it.storeName.contains(currentFilter, ignoreCase = true)
+    val context = LocalContext.current
+    val storeOptions = listOf(
+        "Toate",
+        "Kaufland Rezervelor",
+        "Lidl Tineretului",
+        "Auchan Militari",
+        "Penny Chiajna",
+        "Metro Militari",
+        "Mega Image"
+    )
+
+    val filteredDeals = deals.filter { deal ->
+        when (currentFilter) {
+            "Toate" -> true
+            "Kaufland Rezervelor" -> deal.storeName.contains("Kaufland", ignoreCase = true)
+            "Lidl Tineretului" -> deal.storeName.contains("Lidl", ignoreCase = true)
+            "Auchan Militari" -> deal.storeName.contains("Auchan", ignoreCase = true)
+            "Penny Chiajna" -> deal.storeName.contains("Penny", ignoreCase = true)
+            "Metro Militari" -> deal.storeName.contains("Metro", ignoreCase = true)
+            "Mega Image" -> deal.storeName.contains("Mega", ignoreCase = true)
+            else -> deal.storeName.contains(currentFilter, ignoreCase = true)
+        }
     }
 
     LazyColumn(
@@ -756,15 +827,15 @@ fun DealsCatalogTab(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         item {
-            Row(
+            LazyRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                storeOptions.forEach { option ->
+                items(storeOptions) { option ->
                     FilterChip(
                         selected = currentFilter == option,
                         onClick = { onFilterChange(option) },
-                        label = { Text(option) },
+                        label = { Text(option, fontSize = 12.sp) },
                         leadingIcon = if (currentFilter == option) {
                             { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
                         } else null
@@ -779,54 +850,66 @@ fun DealsCatalogTab(
                 shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
             ) {
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(14.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(14.dp)
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    deal.productName,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "-${deal.discountPercent}%",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = SuccessGreenLight,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .background(SuccessGreenLight.copy(alpha = 0.15f), RoundedCornerShape(6.dp))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                deal.productName,
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "-${deal.discountPercent}%",
+                                text = "${deal.storeName} • ${deal.storeBranch}",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = SuccessGreenLight,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier
-                                    .background(SuccessGreenLight.copy(alpha = 0.15f), RoundedCornerShape(6.dp))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            // Proximity Badge
+                            Text(
+                                text = deal.proximityText,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF00F0FF),
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            // Shelf Location
+                            Text(
+                                text = "🧭 ${deal.aisleLocation}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "${deal.storeName} • ${deal.storeBranch}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "📍 ${deal.aisleLocation}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.SemiBold
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(horizontalAlignment = Alignment.End) {
                             Text(
                                 "${String.format(Locale.US, "%.2f", deal.discountPrice)} lei",
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = SuccessGreenLight
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 "${String.format(Locale.US, "%.2f", deal.originalPrice)} lei",
                                 style = MaterialTheme.typography.bodySmall.copy(
@@ -837,14 +920,36 @@ fun DealsCatalogTab(
                         }
                     }
 
-                    Button(
-                        onClick = { onAddDeal(deal) },
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Action buttons: GPS Navigation + Add to List
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("În listă", fontSize = 12.sp)
+                        OutlinedButton(
+                            onClick = {
+                                StoreLocationHelper.openStoreInGoogleMaps(context, deal.storeName, deal.storeBranch)
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Icon(Icons.Default.Place, contentDescription = null, modifier = Modifier.size(15.dp), tint = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Hartă GPS", fontSize = 11.5.sp)
+                        }
+
+                        Button(
+                            onClick = { onAddDeal(deal) },
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Pune în Listă", fontSize = 11.5.sp)
+                        }
                     }
                 }
             }

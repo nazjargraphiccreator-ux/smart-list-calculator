@@ -2,8 +2,8 @@ package ro.smartshopping.list.domain.model
 
 data class StoreDeal(
     val id: String,
-    val storeName: String, // "Kaufland Militari" sau "Auchan Militari"
-    val storeBranch: String, // "Str. Valea Cascadelor 3, Militari" sau "Centrul Comercial Militari, Bd. Iuliu Maniu 560A"
+    val storeName: String, // "Kaufland Militari Residence", "Auchan Militari", "Lidl Militari Residence", "Penny Chiajna", "Metro Militari"
+    val storeBranch: String, // Adresă fizică exactă în Chiajna / Militari
     val productName: String,
     val category: String,
     val originalPrice: Double,
@@ -11,11 +11,13 @@ data class StoreDeal(
     val discountPercent: Int,
     val unit: UnitOfMeasure = UnitOfMeasure.PCS,
     val validUntil: String = "Valabil săptămâna aceasta",
-    val aisleLocation: String, // ex: "Raion Lactate - Raft 3", "Raion Băcănie - Raft 5"
+    val aisleLocation: String, // Locație exactă la raft / culoar
     val badge: String = "Promoție",
     val inStock: Boolean = true,
     val officialCatalogUrl: String? = null,
-    val officialAppName: String? = null
+    val officialAppName: String? = null,
+    val proximityText: String = "📍 Lângă Militari Residence / Chiajna",
+    val googleMapsUrl: String? = null
 )
 
 data class StoreDealNotification(
