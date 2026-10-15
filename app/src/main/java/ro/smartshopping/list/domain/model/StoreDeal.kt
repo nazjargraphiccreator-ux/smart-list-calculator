@@ -13,7 +13,9 @@ data class StoreDeal(
     val validUntil: String = "Valabil săptămâna aceasta",
     val aisleLocation: String, // ex: "Raion Lactate - Raft 3", "Raion Băcănie - Raft 5"
     val badge: String = "Promoție",
-    val inStock: Boolean = true
+    val inStock: Boolean = true,
+    val officialCatalogUrl: String? = null,
+    val officialAppName: String? = null
 )
 
 data class StoreDealNotification(

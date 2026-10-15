@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Store
@@ -48,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,8 +68,12 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import ro.smartshopping.list.domain.model.ItemPurchaseStage
 import ro.smartshopping.list.domain.model.ShoppingListItem
+import ro.smartshopping.list.domain.model.StoreDeal
 import ro.smartshopping.list.domain.model.UnitOfMeasure
 import ro.smartshopping.list.ui.components.CompletionProgressBar
+import ro.smartshopping.list.ui.components.LiveBudgetCountdownCard
+import ro.smartshopping.list.ui.components.ProductBarcodeScannerDialog
+import ro.smartshopping.list.ui.components.StoreDealsBanner
 import ro.smartshopping.list.ui.screens.lists.ListDetailViewModel
 import ro.smartshopping.list.ui.theme.SuccessGreenLight
 import ro.smartshopping.list.util.StoreLocationHelper
@@ -86,6 +92,14 @@ fun ShoppingModeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    var showBarcodeScanner by remember { mutableStateOf(false) }
+    var matchingDeals by remember { mutableStateOf<List<StoreDeal>>(emptyList()) }
+
+    LaunchedEffect(state.items) {
+        val names = state.items.map { it.productNameSnapshot }
+        matchingDeals = viewModel.storeDealsRepository?.getDealsMatchingList(names) ?: emptyList()
+    }
 
     // Sorting: TO_BUY first, then IN_CART, then PURCHASED at bottom
     val sortedItems = remember(state.items) {
@@ -128,6 +142,18 @@ fun ShoppingModeScreen(
                     }
                 },
                 actions = {
+                    // Barcode Scanner button at shelf
+                    IconButton(
+                        onClick = { showBarcodeScanner = true },
+                        modifier = Modifier.padding(end = 2.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = "Scanează Cod Raft",
+                            tint = Color(0xFF00FF88)
+                        )
+                    }
+
                     IconButton(
                         onClick = onNavigateToWallet,
                         modifier = Modifier.padding(end = 4.dp)
@@ -175,6 +201,20 @@ fun ShoppingModeScreen(
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { showBarcodeScanner = true },
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color(0xFF00FF88).copy(alpha = 0.2f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = "Scan la Raft",
+                            tint = Color(0xFF00FF88),
+                            modifier = Modifier.size(22.dp)
                         )
                     }
 
@@ -239,6 +279,27 @@ fun ShoppingModeScreen(
                         }
                     }
                 }
+            }
+
+            // Live Budget Countdown Card (Real-Time Subtraction + Exceed Alert)
+            LiveBudgetCountdownCard(
+                summary = summary,
+                listName = state.list?.name ?: "Listă Cumpărături",
+                onUpdateBudget = { newBudget ->
+                    viewModel.updateListBudget(newBudget)
+                },
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+
+            // Official Store Deals Banner (Metro, Kaufland, Auchan, Lidl)
+            if (matchingDeals.isNotEmpty()) {
+                StoreDealsBanner(
+                    matchingDeals = matchingDeals,
+                    onApplyDealPrice = { name, discountPrice ->
+                        viewModel.applyDiscountPriceToItem(name, discountPrice)
+                    },
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
             }
 
             // 3-Stage shopping stats chips: Planificate, În coș, Plătite
@@ -313,6 +374,33 @@ fun ShoppingModeScreen(
                 }
             }
         }
+    }
+
+    if (showBarcodeScanner) {
+        ProductBarcodeScannerDialog(
+            itemsInList = state.items,
+            currency = currency,
+            productRepository = viewModel.productRepository,
+            onPutInCart = { itemId, price ->
+                viewModel.updateItemPurchaseStage(itemId, ItemPurchaseStage.IN_CART, price)
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Produs scanat și pus în coș!",
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            },
+            onAddNewProductToCart = { name, quantity, unit, price, barcode ->
+                viewModel.addOrUpdateProductFromBarcode(name, quantity, unit, price, barcode, putInCart = true)
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Produs nou adăugat direct în coș!",
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            },
+            onDismiss = { showBarcodeScanner = false }
+        )
     }
 }
 

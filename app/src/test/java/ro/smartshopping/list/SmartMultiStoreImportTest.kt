@@ -197,4 +197,32 @@ Kaufland:
         assertEquals("Detergent - 1 buc", res4)
         assertNotNull(note4)
     }
+
+    @Test
+    fun testStoreDetectedFromTitleAutomatically() {
+        val inputWithStoreInTitle = """
+            Lista cumpărături Metro:
+            1. Săpun - 6 buc
+            2. Bulion sultan - 4 buc
+            3. Orez - 1 buc
+            4. Scărița afumata 3kg
+        """.trimIndent()
+
+        val result = parser.parse(inputWithStoreInTitle)
+        assertEquals(4, result.items.size)
+        assertEquals("Lista cumpărături Metro", result.suggestedTitle)
+        assertEquals(1, result.storesDetected.size)
+        assertEquals("Metro", result.storesDetected[0])
+
+        // All items automatically assigned to Metro
+        assertTrue(result.items.all { it.storeName == "Metro" })
+        assertEquals("Săpun", result.items[0].name)
+        assertEquals(6.0, result.items[0].quantity, 0.001)
+        assertEquals("Bulion Sultan", result.items[1].name)
+        assertEquals(4.0, result.items[1].quantity, 0.001)
+        assertEquals("Orez", result.items[2].name)
+        assertEquals(1.0, result.items[2].quantity, 0.001)
+        assertEquals("Scăriță afumată", result.items[3].name)
+        assertEquals(3.0, result.items[3].quantity, 0.001)
+    }
 }

@@ -15,3 +15,6 @@ captures/
 .cxx/
 scratch/
 .kotlin/
+release/
+*.apk
+*.idsig

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
@@ -52,6 +53,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -88,7 +90,11 @@ import ro.smartshopping.list.domain.parser.SmartTextImportParser
 import ro.smartshopping.list.domain.usecase.CalculateFinancialSummaryUseCase
 import ro.smartshopping.list.domain.usecase.FormatListForSharingUseCase
 import ro.smartshopping.list.domain.usecase.RecordPurchasePriceUseCase
+import ro.smartshopping.list.domain.model.StoreDeal
 import ro.smartshopping.list.ui.components.FinancialSummaryCard
+import ro.smartshopping.list.ui.components.LiveBudgetCountdownCard
+import ro.smartshopping.list.ui.components.ProductBarcodeScannerDialog
+import ro.smartshopping.list.ui.components.StoreDealsBanner
 import ro.smartshopping.list.ui.components.StorePickerDialog
 import ro.smartshopping.list.ui.components.TextImportDialog
 import ro.smartshopping.list.ui.theme.SuccessGreenLight
@@ -100,11 +106,12 @@ import java.util.UUID
 class ListDetailViewModel(
     private val listId: String,
     private val listRepository: ShoppingListRepository,
-    private val productRepository: ProductRepository,
+    val productRepository: ProductRepository,
     private val priceRepository: PriceTrackingRepository,
     private val financialCalculator: CalculateFinancialSummaryUseCase,
     private val recordPriceUseCase: RecordPurchasePriceUseCase,
-    private val formatShareUseCase: FormatListForSharingUseCase
+    private val formatShareUseCase: FormatListForSharingUseCase,
+    val storeDealsRepository: ro.smartshopping.list.data.repository.StoreDealsRepository? = null
 ) : ViewModel() {
 
     val uiState: StateFlow<ListDetailUiState> = combine(
@@ -316,6 +323,69 @@ class ListDetailViewModel(
         val shareText = formatShareUseCase(list, items, isRomanian = true)
         ShareIntentHelper.shareText(context, shareText, "Trimite: ${list.name}")
     }
+
+    fun addOrUpdateProductFromBarcode(
+        name: String,
+        quantity: Double,
+        unit: UnitOfMeasure,
+        price: Double?,
+        barcode: String,
+        putInCart: Boolean = true
+    ) {
+        viewModelScope.launch {
+            val existing = uiState.value.items.find {
+                it.productNameSnapshot.equals(name, ignoreCase = true) || it.notes?.contains(barcode) == true
+            }
+            if (existing != null) {
+                val updated = existing.copy(
+                    actualUnitPrice = price ?: existing.actualUnitPrice,
+                    estimatedUnitPrice = price ?: existing.estimatedUnitPrice,
+                    isInCart = putInCart,
+                    isPurchased = false,
+                    notes = if (existing.notes.isNullOrBlank()) "Cod: $barcode" else existing.notes
+                )
+                listRepository.updateItem(updated)
+            } else {
+                val product = productRepository.findOrCreateProduct(
+                    name = name,
+                    defaultUnit = unit,
+                    estimatedPrice = price
+                ).copy(barcode = barcode)
+                productRepository.saveProduct(product)
+
+                val newItem = ShoppingListItem(
+                    id = UUID.randomUUID().toString(),
+                    shoppingListId = listId,
+                    productId = product.id,
+                    productNameSnapshot = product.name,
+                    quantity = quantity,
+                    unit = unit,
+                    estimatedUnitPrice = price ?: product.lastKnownPrice,
+                    actualUnitPrice = if (putInCart) price else null,
+                    isPurchased = false,
+                    isInCart = putInCart,
+                    category = product.category,
+                    notes = "Cod: $barcode"
+                )
+                listRepository.addItem(newItem)
+            }
+        }
+    }
+
+    fun applyDiscountPriceToItem(productName: String, discountPrice: Double) {
+        viewModelScope.launch {
+            val item = uiState.value.items.find {
+                it.productNameSnapshot.contains(productName, ignoreCase = true) ||
+                productName.contains(it.productNameSnapshot, ignoreCase = true)
+            } ?: return@launch
+
+            val updated = item.copy(
+                estimatedUnitPrice = discountPrice,
+                actualUnitPrice = if (item.isInCart || item.isPurchased) discountPrice else item.actualUnitPrice
+            )
+            listRepository.updateItem(updated)
+        }
+    }
 }
 
 data class ListDetailUiState(
@@ -340,7 +410,14 @@ fun ListDetailScreen(
 
     var showImportDialog by remember { mutableStateOf(false) }
     var showStoreDialog by remember { mutableStateOf(false) }
+    var showBarcodeScanner by remember { mutableStateOf(false) }
     var editingPriceItem by remember { mutableStateOf<ShoppingListItem?>(null) }
+    var matchingDeals by remember { mutableStateOf<List<StoreDeal>>(emptyList()) }
+
+    LaunchedEffect(state.items) {
+        val names = state.items.map { it.productNameSnapshot }
+        matchingDeals = viewModel.storeDealsRepository?.getDealsMatchingList(names) ?: emptyList()
+    }
 
     var newItemName by remember { mutableStateOf("") }
     var newItemQty by remember { mutableStateOf("1") }
@@ -373,6 +450,15 @@ fun ListDetailScreen(
                     }
                 },
                 actions = {
+                    // Barcode Scanner Button (Shelf Scanner)
+                    IconButton(onClick = { showBarcodeScanner = true }) {
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = "Scan la Raft",
+                            tint = Color(0xFF00FF88)
+                        )
+                    }
+
                     // Smart Text Import Button
                     IconButton(onClick = { showImportDialog = true }) {
                         Icon(Icons.Default.AutoAwesome, contentDescription = "Import Text", tint = MaterialTheme.colorScheme.primary)
@@ -483,6 +569,27 @@ fun ListDetailScreen(
                         }
                     }
                 }
+            }
+
+            // Live Budget Countdown Card (Real-Time Subtraction + Exceed Alert)
+            LiveBudgetCountdownCard(
+                summary = state.summary,
+                listName = state.list?.name ?: "Listă Cumpărături",
+                onUpdateBudget = { newBudget ->
+                    viewModel.updateListBudget(newBudget)
+                },
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            // Official Store Deals Banner (Metro, Kaufland, Auchan, Lidl)
+            if (matchingDeals.isNotEmpty()) {
+                StoreDealsBanner(
+                    matchingDeals = matchingDeals,
+                    onApplyDealPrice = { name, discountPrice ->
+                        viewModel.applyDiscountPriceToItem(name, discountPrice)
+                    },
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
             }
 
             // Financial Summary Card with budget tracking & in-cart live values
@@ -695,6 +802,22 @@ fun ListDetailScreen(
                     Text("Anulează")
                 }
             }
+        )
+    }
+
+    // Shelf Product Barcode Scanner Dialog
+    if (showBarcodeScanner) {
+        ProductBarcodeScannerDialog(
+            itemsInList = state.items,
+            currency = currency,
+            productRepository = viewModel.productRepository,
+            onPutInCart = { itemId, price ->
+                viewModel.updateItemPurchaseStage(itemId, ItemPurchaseStage.IN_CART, price)
+            },
+            onAddNewProductToCart = { name, quantity, unit, price, barcode ->
+                viewModel.addOrUpdateProductFromBarcode(name, quantity, unit, price, barcode, putInCart = true)
+            },
+            onDismiss = { showBarcodeScanner = false }
         )
     }
 }

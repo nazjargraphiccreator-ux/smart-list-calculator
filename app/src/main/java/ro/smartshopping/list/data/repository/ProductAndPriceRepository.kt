@@ -16,6 +16,7 @@ interface ProductRepository {
     fun getAllProductsFlow(): Flow<List<Product>>
     fun searchProductsFlow(query: String): Flow<List<Product>>
     suspend fun getProductById(id: String): Product?
+    suspend fun findProductByBarcode(barcode: String): Product?
     suspend fun findOrCreateProduct(name: String, category: String = "Alimente", defaultUnit: UnitOfMeasure = UnitOfMeasure.PCS, estimatedPrice: Double? = null): Product
     suspend fun saveProduct(product: Product)
     suspend fun updateProduct(product: Product)
@@ -40,6 +41,10 @@ class ProductRepositoryImpl(
 
     override suspend fun getProductById(id: String): Product? {
         return productDao.getProductById(id)?.toDomain()
+    }
+
+    override suspend fun findProductByBarcode(barcode: String): Product? {
+        return productDao.findProductByBarcode(barcode.trim())?.toDomain()
     }
 
     override suspend fun findOrCreateProduct(

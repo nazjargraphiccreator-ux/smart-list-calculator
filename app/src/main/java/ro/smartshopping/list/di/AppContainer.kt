@@ -74,4 +74,12 @@ class AppContainer(private val context: Context) {
             loyaltyCardDao = database.loyaltyCardDao()
         )
     }
+
+    val storeDealsWorker: ro.smartshopping.list.domain.worker.StoreDealsBackgroundWorker by lazy {
+        ro.smartshopping.list.domain.worker.StoreDealsBackgroundWorker(
+            context = context,
+            listRepository = shoppingListRepository,
+            storeDealsRepository = storeDealsRepository
+        )
+    }
 }

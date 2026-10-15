@@ -158,7 +158,8 @@ fun AppNavHost(
                         priceRepository = container.priceTrackingRepository,
                         financialCalculator = container.financialCalculator,
                         recordPriceUseCase = container.recordPriceUseCase,
-                        formatShareUseCase = container.formatShareUseCase
+                        formatShareUseCase = container.formatShareUseCase,
+                        storeDealsRepository = container.storeDealsRepository
                     )
                 }
                 ListDetailScreen(
@@ -187,7 +188,8 @@ fun AppNavHost(
                         priceRepository = container.priceTrackingRepository,
                         financialCalculator = container.financialCalculator,
                         recordPriceUseCase = container.recordPriceUseCase,
-                        formatShareUseCase = container.formatShareUseCase
+                        formatShareUseCase = container.formatShareUseCase,
+                        storeDealsRepository = container.storeDealsRepository
                     )
                 }
                 ShoppingModeScreen(
@@ -215,7 +217,8 @@ fun AppNavHost(
                         priceRepository = container.priceTrackingRepository,
                         financialCalculator = container.financialCalculator,
                         recordPriceUseCase = container.recordPriceUseCase,
-                        formatShareUseCase = container.formatShareUseCase
+                        formatShareUseCase = container.formatShareUseCase,
+                        storeDealsRepository = container.storeDealsRepository
                     )
                 }
                 ro.smartshopping.list.ui.screens.shopping.PrePaymentCalculatorScreen(

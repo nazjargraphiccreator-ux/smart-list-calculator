@@ -259,13 +259,51 @@ class SmartTextImportParser {
     }
 
     /**
+     * Extracts a known store name from any title or text if present.
+     */
+    fun extractStoreFromText(text: String): String? {
+        val lower = text.lowercase().trim()
+        return when {
+            lower.contains("piat") || lower.contains("piaț") -> "Piață"
+            lower.contains("metro") -> "Metro"
+            lower.contains("kaufland") -> "Kaufland"
+            lower.contains("auchan") -> "Auchan"
+            lower.contains("lidl") -> "Lidl"
+            lower.contains("carrefour") -> "Carrefour"
+            lower.contains("mega image") || lower.contains("mega") -> "Mega Image"
+            lower.contains("penny") -> "Penny"
+            lower.contains("profi") -> "Profi"
+            lower.contains("selgros") -> "Selgros"
+            lower.contains("cora") -> "Cora"
+            lower.contains("dm") -> "DM"
+            lower.contains("dedeman") -> "Dedeman"
+            lower.contains("leroy merlin") || lower.contains("leroy") -> "Leroy Merlin"
+            lower.contains("brico") -> "Brico Depot"
+            lower.contains("farmacie") -> "Farmacie"
+            else -> null
+        }
+    }
+
+    /**
      * Detects if a line is an overall document title rather than a product.
+     * Supports standalone titles, or titles containing store names (e.g. "Lista Metro", "Lista cumpărături Kaufland").
      */
     fun isDocumentTitle(line: String): Boolean {
         val clean = line.trim()
-        return clean.matches(
+        if (clean.matches(
             Regex("""^(?:lista(?:\s+de)?\s+cump[aă]r[aă]turi|shopping\s*list|de\s+cump[aă]rat|cump[aă]r[aă]turi)[\s:]*$""", RegexOption.IGNORE_CASE)
-        )
+        )) return true
+
+        // Handles "Lista cumpărături Metro", "Lista Metro", "Cumpărături Kaufland", "Shopping list Lidl"
+        if (clean.matches(
+            Regex("""^(?:lista(?:\s+de)?\s+cump[aă]r[aă]turi|lista|shopping\s*list|de\s+cump[aă]rat|cump[aă]r[aă]turi)\s+([A-Za-zăâîșțĂÂÎȘȚ0-9\s&.-]+?)[\s:]*$""", RegexOption.IGNORE_CASE)
+        )) {
+            val suffix = clean.replace(Regex("""^(?:lista(?:\s+de)?\s+cump[aă]r[aă]turi|lista|shopping\s*list|de\s+cump[aă]rat|cump[aă]r[aă]turi)\s+""", RegexOption.IGNORE_CASE), "").removeSuffix(":").trim()
+            if (extractStoreFromText(suffix) != null || suffix.length <= 25) {
+                return true
+            }
+        }
+        return false
     }
 
     /**
@@ -298,21 +336,10 @@ class SmartTextImportParser {
     }
 
     fun normalizeStoreName(raw: String): String {
-        val lower = raw.lowercase().trim()
-        return when {
-            lower.contains("piat") || lower.contains("piaț") -> "Piață"
-            lower.contains("kaufland") -> "Kaufland"
-            lower.contains("auchan") -> "Auchan"
-            lower.contains("metro") -> "Metro"
-            lower.contains("lidl") -> "Lidl"
-            lower.contains("carrefour") -> "Carrefour"
-            lower.contains("mega") -> "Mega Image"
-            lower.contains("penny") -> "Penny"
-            lower.contains("profi") -> "Profi"
-            lower.contains("selgros") -> "Selgros"
-            else -> raw.split(" ").filter { it.isNotBlank() }.joinToString(" ") { word ->
-                word.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-            }
+        val extracted = extractStoreFromText(raw)
+        if (extracted != null) return extracted
+        return raw.split(" ").filter { it.isNotBlank() }.joinToString(" ") { word ->
+            word.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         }
     }
 
@@ -337,6 +364,13 @@ class SmartTextImportParser {
         for (line in lines) {
             if (isDocumentTitle(line)) {
                 suggestedTitle = line.trim().removeSuffix(":").trim()
+                val storeInTitle = extractStoreFromText(suggestedTitle)
+                if (storeInTitle != null) {
+                    currentStore = storeInTitle
+                    if (!storesDetected.contains(storeInTitle)) {
+                        storesDetected.add(storeInTitle)
+                    }
+                }
                 continue
             }
 
@@ -345,6 +379,10 @@ class SmartTextImportParser {
                 currentStore = storeHeader
                 if (!storesDetected.contains(storeHeader)) {
                     storesDetected.add(storeHeader)
+                }
+                // If suggested title is still default and this is first store, suggest title with store
+                if (suggestedTitle == "Listă Cumpărături" && parsedItems.isEmpty()) {
+                    suggestedTitle = "Lista Cumpărături $storeHeader"
                 }
                 continue
             }

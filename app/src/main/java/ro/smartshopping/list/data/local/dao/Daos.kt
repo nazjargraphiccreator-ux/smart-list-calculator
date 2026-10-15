@@ -105,6 +105,9 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE LOWER(name) = LOWER(:name) LIMIT 1")
     suspend fun findProductByName(name: String): ProductEntity?
 
+    @Query("SELECT * FROM products WHERE barcode = :barcode LIMIT 1")
+    suspend fun findProductByBarcode(barcode: String): ProductEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProduct(product: ProductEntity)
 
