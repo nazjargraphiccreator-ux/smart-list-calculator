@@ -22,6 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Remove
@@ -78,6 +79,7 @@ fun ShoppingModeScreen(
     viewModel: ListDetailViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToPrePayment: () -> Unit,
+    onNavigateToWallet: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -126,6 +128,17 @@ fun ShoppingModeScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = onNavigateToWallet,
+                        modifier = Modifier.padding(end = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CreditCard,
+                            contentDescription = "Card Magazin",
+                            tint = Color(0xFF00FF88)
+                        )
+                    }
+
                     Button(
                         onClick = onNavigateToPrePayment,
                         shape = RoundedCornerShape(16.dp),

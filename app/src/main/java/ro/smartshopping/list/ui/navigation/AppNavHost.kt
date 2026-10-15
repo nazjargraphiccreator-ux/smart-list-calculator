@@ -39,9 +39,10 @@ fun AppNavHost(
     val shouldShowBottomBar = currentRoute in listOf(
         Screen.Lists.route,
         Screen.SmartAgent.route,
-        Screen.Products.route,
-        Screen.History.route,
+        Screen.LoyaltyWallet.route,
         Screen.PriceTrends.route,
+        Screen.History.route,
+        Screen.Products.route,
         Screen.Profile.route
     )
 
@@ -91,6 +92,17 @@ fun AppNavHost(
                     onNavigateToListDetail = { listId ->
                         navController.navigate(Screen.ListDetail.createRoute(listId))
                     }
+                )
+            }
+
+            composable(Screen.LoyaltyWallet.route) {
+                val viewModel = remember {
+                    ro.smartshopping.list.ui.screens.wallet.LoyaltyWalletViewModel(
+                        repository = container.loyaltyCardRepository
+                    )
+                }
+                ro.smartshopping.list.ui.screens.wallet.LoyaltyWalletScreen(
+                    viewModel = viewModel
                 )
             }
 
@@ -183,6 +195,9 @@ fun AppNavHost(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToPrePayment = {
                         navController.navigate(Screen.PrePaymentCalculator.createRoute(listId))
+                    },
+                    onNavigateToWallet = {
+                        navController.navigate(Screen.LoyaltyWallet.route)
                     }
                 )
             }

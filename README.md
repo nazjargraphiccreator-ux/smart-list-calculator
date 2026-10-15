@@ -55,6 +55,15 @@ Calculează suma exactă înainte de casa de marcat, adaugă automat garanția *
 
 ---
 
+### 4. Portofel Securizat Carduri Magazin & Scanare Instantanee POS
+Gestionează toate cardurile de fidelitate (Kaufland, Auchan, Lidl, Carrefour etc.) într-un portofel digital 3D securizat offline. Scanează cardul fizic direct cu camera telefonului și afișează codul de bare mărit și luminos la casa de marcat.
+
+<div align="center">
+  <img src="docs/mockups/mockup_loyalty_wallet.jpg" alt="Portofel Securizat Carduri Magazin Smart-list-Calculator" width="85%" style="border-radius: 16px; margin: 15px 0;" />
+</div>
+
+---
+
 ## 🌟 Funcționalități Majore
 
 ### 🤖 1. Agent Inteligent & Monitorizare Reduceri Magazine Militari
@@ -116,9 +125,17 @@ Generat automat de aplicația Smart-list-Calculator (Android 2026)
 =================================================================
 ```
 
+### 💳 3. Portofel Securizat Carduri Magazin (Loyalty Wallet) & Scanare Nativă
+Spune adio teancului de carduri de plastic din portofel la cumpărături:
+* **Securitate & Stocare 100% Locală**: Cardurile tale de fidelitate sunt stocate securizat direct pe telefon în baza de date Room SQLite (zero acces terț, confidențialitate absolută).
+* **Scanare Carduri Fizice cu Camera**: Deschizi scanerul integrat bazat pe CameraX & ZXing, încadrezi codul de bare sau codul QR de pe cardul de plastic, iar aplicația îl recunoaște instantaneu.
+* **Prescurtări Rapide pentru Magazine Românești**: Presets pre-colorate pentru *Kaufland Card (Militari)*, *MyClub Auchan (Militari)*, *Lidl Plus*, *Carrefour Act For Good*, *Mega Image*, *Penny*, *Catena*, *Dr. Max* sau magazine custom.
+* **Mod Optimizat pentru Scanerul de la Casă (Cashier POS Mode)**: La un singur tap pe card, ecranul afișează codul de bare mărit cu contrast maxim alb-negru (Code 128 / QR Code) pentru scanare din prima secundă la casele asistate sau la casele de tip self-checkout.
+* **Acces Imediat din Modul Cumpărături**: Când ești la casierie în aplicație, ai butonul `[💳 Card Magazin]` chiar în bara superioară, fără a fi nevoie să cauți prin alte meniuri.
+
 ---
 
-### 🧮 3. Calculator Pre-Plată & Detector Garanție SGR
+### 🧮 4. Calculator Pre-Plată & Detector Garanție SGR
 * **Estimare Real-Time**: Pe măsură ce adaugi produse în coș la cumpărături, totalul se recalculează instant.
 * **Garanție SGR (0.50 RON)**: Recunoaște automat ambalajele de sticlă, plastic și doze de aluminiu supuse Sistemului de Garanție-Returnare din România și adaugă 0.50 RON/bucată în defalcarea financiară.
 * **Comparație Preț pe Unitate**: Vezi instant dacă un pachet mare de 800g este mai avantajos decât 2 pachete de 350g (calcul automat RON/kg).

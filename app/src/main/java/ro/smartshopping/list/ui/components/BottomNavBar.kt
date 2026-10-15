@@ -3,6 +3,7 @@ package ro.smartshopping.list.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Person
@@ -21,9 +22,9 @@ import ro.smartshopping.list.ui.navigation.Screen
 sealed class BottomNavItem(val screen: Screen, val icon: ImageVector) {
     data object Lists : BottomNavItem(Screen.Lists, Icons.Default.ShoppingCart)
     data object SmartAgent : BottomNavItem(Screen.SmartAgent, Icons.Default.AutoAwesome)
+    data object LoyaltyWallet : BottomNavItem(Screen.LoyaltyWallet, Icons.Default.CreditCard)
     data object PriceTrends : BottomNavItem(Screen.PriceTrends, Icons.Default.Analytics)
     data object History : BottomNavItem(Screen.History, Icons.Default.History)
-    data object Profile : BottomNavItem(Screen.Profile, Icons.Default.Person)
 }
 
 @Composable
@@ -31,9 +32,9 @@ fun BottomNavBar(navController: NavController) {
     val items = listOf(
         BottomNavItem.Lists,
         BottomNavItem.SmartAgent,
+        BottomNavItem.LoyaltyWallet,
         BottomNavItem.PriceTrends,
-        BottomNavItem.History,
-        BottomNavItem.Profile
+        BottomNavItem.History
     )
 
     val navBackStackEntry = navController.currentBackStackEntryAsState()

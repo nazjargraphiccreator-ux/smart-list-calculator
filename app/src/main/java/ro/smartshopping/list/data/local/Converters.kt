@@ -48,4 +48,18 @@ class Converters {
             }
         }
     }
+
+    @TypeConverter
+    fun fromBarcodeType(value: ro.smartshopping.list.domain.model.BarcodeType?): String? = value?.name
+
+    @TypeConverter
+    fun toBarcodeType(value: String?): ro.smartshopping.list.domain.model.BarcodeType? {
+        return value?.let {
+            try {
+                ro.smartshopping.list.domain.model.BarcodeType.valueOf(it)
+            } catch (e: Exception) {
+                ro.smartshopping.list.domain.model.BarcodeType.CODE_128
+            }
+        }
+    }
 }

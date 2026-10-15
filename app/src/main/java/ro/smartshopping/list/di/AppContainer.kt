@@ -68,4 +68,10 @@ class AppContainer(private val context: Context) {
     val smartDiscountAgent: ro.smartshopping.list.domain.usecase.SmartDiscountAgentUseCase by lazy {
         ro.smartshopping.list.domain.usecase.SmartDiscountAgentUseCase(storeDealsRepository)
     }
+
+    val loyaltyCardRepository: ro.smartshopping.list.data.repository.LoyaltyCardRepository by lazy {
+        ro.smartshopping.list.data.repository.LoyaltyCardRepositoryImpl(
+            loyaltyCardDao = database.loyaltyCardDao()
+        )
+    }
 }

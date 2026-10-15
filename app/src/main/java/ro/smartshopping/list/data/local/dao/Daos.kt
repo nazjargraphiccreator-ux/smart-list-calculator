@@ -153,3 +153,39 @@ interface UserDao {
     @Query("DELETE FROM users")
     suspend fun clearUser()
 }
+
+@Dao
+interface LoyaltyCardDao {
+    @Query("SELECT * FROM loyalty_cards ORDER BY isFavorite DESC, storeName ASC")
+    fun getAllLoyaltyCardsFlow(): Flow<List<ro.smartshopping.list.data.local.entity.LoyaltyCardEntity>>
+
+    @Query("SELECT * FROM loyalty_cards WHERE isFavorite = 1 ORDER BY storeName ASC")
+    fun getFavoriteLoyaltyCardsFlow(): Flow<List<ro.smartshopping.list.data.local.entity.LoyaltyCardEntity>>
+
+    @Query("SELECT * FROM loyalty_cards WHERE id = :id LIMIT 1")
+    suspend fun getLoyaltyCardById(id: String): ro.smartshopping.list.data.local.entity.LoyaltyCardEntity?
+
+    @Query("SELECT * FROM loyalty_cards WHERE storeName LIKE '%' || :storeName || '%' LIMIT 1")
+    suspend fun getLoyaltyCardForStore(storeName: String): ro.smartshopping.list.data.local.entity.LoyaltyCardEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertLoyaltyCard(card: ro.smartshopping.list.data.local.entity.LoyaltyCardEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertLoyaltyCards(cards: List<ro.smartshopping.list.data.local.entity.LoyaltyCardEntity>)
+
+    @Update
+    suspend fun updateLoyaltyCard(card: ro.smartshopping.list.data.local.entity.LoyaltyCardEntity)
+
+    @Delete
+    suspend fun deleteLoyaltyCard(card: ro.smartshopping.list.data.local.entity.LoyaltyCardEntity)
+
+    @Query("DELETE FROM loyalty_cards WHERE id = :id")
+    suspend fun deleteLoyaltyCardById(id: String)
+
+    @Query("UPDATE loyalty_cards SET lastScannedAt = :scannedAt WHERE id = :id")
+    suspend fun updateLastScanned(id: String, scannedAt: Long = System.currentTimeMillis())
+
+    @Query("UPDATE loyalty_cards SET isFavorite = :isFavorite WHERE id = :id")
+    suspend fun updateFavorite(id: String, isFavorite: Boolean)
+}

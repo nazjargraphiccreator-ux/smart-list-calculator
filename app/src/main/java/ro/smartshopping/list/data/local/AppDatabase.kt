@@ -9,16 +9,19 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import ro.smartshopping.list.data.local.dao.LoyaltyCardDao
 import ro.smartshopping.list.data.local.dao.PriceRecordDao
 import ro.smartshopping.list.data.local.dao.ProductDao
 import ro.smartshopping.list.data.local.dao.ShoppingListDao
 import ro.smartshopping.list.data.local.dao.ShoppingListItemDao
 import ro.smartshopping.list.data.local.dao.UserDao
+import ro.smartshopping.list.data.local.entity.LoyaltyCardEntity
 import ro.smartshopping.list.data.local.entity.PriceRecordEntity
 import ro.smartshopping.list.data.local.entity.ProductEntity
 import ro.smartshopping.list.data.local.entity.ShoppingListEntity
 import ro.smartshopping.list.data.local.entity.ShoppingListItemEntity
 import ro.smartshopping.list.data.local.entity.UserEntity
+import ro.smartshopping.list.domain.model.BarcodeType
 import ro.smartshopping.list.domain.model.PriceSourceType
 import ro.smartshopping.list.domain.model.ShoppingListStatus
 import ro.smartshopping.list.domain.model.UnitOfMeasure
@@ -30,9 +33,10 @@ import java.util.UUID
         ShoppingListItemEntity::class,
         ProductEntity::class,
         PriceRecordEntity::class,
-        UserEntity::class
+        UserEntity::class,
+        LoyaltyCardEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -43,6 +47,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun productDao(): ProductDao
     abstract fun priceRecordDao(): PriceRecordDao
     abstract fun userDao(): UserDao
+    abstract fun loyaltyCardDao(): LoyaltyCardDao
 
     companion object {
         @Volatile
@@ -120,6 +125,67 @@ abstract class AppDatabase : RoomDatabase() {
                     PriceRecordEntity(UUID.randomUUID().toString(), p1Id, list1Id, 7.80, 2.0, UnitOfMeasure.L, "RON", "Mega Image", null, PriceSourceType.CONFIRMED_PURCHASE, System.currentTimeMillis())
                 )
                 db.priceRecordDao().insertPriceRecords(priceRecords)
+
+                // Starter Loyalty Cards for Romanian Supermarkets (Militari & General)
+                val starterCards = listOf(
+                    LoyaltyCardEntity(
+                        id = UUID.randomUUID().toString(),
+                        storeName = "Kaufland Militari",
+                        programName = "Kaufland Card",
+                        cardNumber = "2800192837461",
+                        barcodeType = BarcodeType.CODE_128,
+                        primaryColorHex = "#E11A22",
+                        secondaryColorHex = "#7A0006",
+                        cardHolderName = "Client Fidel Militari",
+                        notes = "Valea Cascadelor nr. 3",
+                        isFavorite = true,
+                        createdAt = System.currentTimeMillis() - 86400000L * 14,
+                        lastScannedAt = System.currentTimeMillis() - 86400000L * 2
+                    ),
+                    LoyaltyCardEntity(
+                        id = UUID.randomUUID().toString(),
+                        storeName = "Auchan Militari",
+                        programName = "MyClub Auchan",
+                        cardNumber = "0448927163548",
+                        barcodeType = BarcodeType.CODE_128,
+                        primaryColorHex = "#D61821",
+                        secondaryColorHex = "#0E7535",
+                        cardHolderName = "Client Fidel Auchan",
+                        notes = "Centrul Comercial Militari",
+                        isFavorite = true,
+                        createdAt = System.currentTimeMillis() - 86400000L * 10,
+                        lastScannedAt = System.currentTimeMillis() - 86400000L * 3
+                    ),
+                    LoyaltyCardEntity(
+                        id = UUID.randomUUID().toString(),
+                        storeName = "Lidl",
+                        programName = "Lidl Plus",
+                        cardNumber = "9900881122334",
+                        barcodeType = BarcodeType.QR_CODE,
+                        primaryColorHex = "#0050AA",
+                        secondaryColorHex = "#FFCC00",
+                        cardHolderName = "Lidl Plus Ro",
+                        notes = "Cupon Reducere Activ",
+                        isFavorite = false,
+                        createdAt = System.currentTimeMillis() - 86400000L * 20,
+                        lastScannedAt = null
+                    ),
+                    LoyaltyCardEntity(
+                        id = UUID.randomUUID().toString(),
+                        storeName = "Carrefour",
+                        programName = "Act For Good",
+                        cardNumber = "1092837465012",
+                        barcodeType = BarcodeType.CODE_128,
+                        primaryColorHex = "#004E98",
+                        secondaryColorHex = "#E63946",
+                        cardHolderName = "Carrefour Puncte",
+                        notes = "Puncte & Vouchere",
+                        isFavorite = false,
+                        createdAt = System.currentTimeMillis() - 86400000L * 25,
+                        lastScannedAt = null
+                    )
+                )
+                db.loyaltyCardDao().insertLoyaltyCards(starterCards)
             }
         }
     }

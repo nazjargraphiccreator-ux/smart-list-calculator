@@ -3,6 +3,7 @@ package ro.smartshopping.list.ui.navigation
 sealed class Screen(val route: String, val titleRo: String, val titleEn: String) {
     data object Lists : Screen("lists", "Liste", "Lists")
     data object SmartAgent : Screen("smart_agent", "Agent Reduceri", "Deals Agent")
+    data object LoyaltyWallet : Screen("loyalty_wallet", "Carduri Magazin", "Store Cards")
     data object Products : Screen("products", "Produse", "Products")
     data object History : Screen("history", "Istoric", "History")
     data object PriceTrends : Screen("price_trends", "Prețuri", "Price Trends")

@@ -123,3 +123,25 @@ data class UserEntity(
     val avatarUrl: String?,
     val createdAt: Long
 )
+
+@Entity(
+    tableName = "loyalty_cards",
+    indices = [
+        Index("storeName"),
+        Index("isFavorite")
+    ]
+)
+data class LoyaltyCardEntity(
+    @PrimaryKey val id: String,
+    val storeName: String,
+    val programName: String,
+    val cardNumber: String,
+    val barcodeType: ro.smartshopping.list.domain.model.BarcodeType,
+    val primaryColorHex: String,
+    val secondaryColorHex: String,
+    val cardHolderName: String?,
+    val notes: String?,
+    val isFavorite: Boolean,
+    val createdAt: Long,
+    val lastScannedAt: Long?
+)
