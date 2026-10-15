@@ -95,6 +95,7 @@ fun ShoppingModeScreen(
     val context = LocalContext.current
 
     var showBarcodeScanner by remember { mutableStateOf(false) }
+    var showWhatsAppShareDialog by remember { mutableStateOf(false) }
     var matchingDeals by remember { mutableStateOf<List<StoreDeal>>(emptyList()) }
 
     LaunchedEffect(state.items) {
@@ -159,6 +160,22 @@ fun ShoppingModeScreen(
                     }
                 },
                 actions = {
+                    // WhatsApp Share ce a rămas de cumpărat (cu iconițe)
+                    IconButton(
+                        onClick = { showWhatsAppShareDialog = true },
+                        modifier = Modifier.padding(end = 2.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF25D366).copy(alpha = 0.22f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("💬", fontSize = 16.sp)
+                        }
+                    }
+
                     // Barcode Scanner button at shelf
                     IconButton(
                         onClick = { showBarcodeScanner = true },
@@ -417,6 +434,15 @@ fun ShoppingModeScreen(
                 }
             },
             onDismiss = { showBarcodeScanner = false }
+        )
+    }
+
+    // Dialog WhatsApp Share cu Iconițe (pentru ce a rămas de cumpărat)
+    if (showWhatsAppShareDialog && state.list != null) {
+        ro.smartshopping.list.ui.components.ShareWhatsAppDialog(
+            list = state.list!!,
+            items = state.items,
+            onDismissRequest = { showWhatsAppShareDialog = false }
         )
     }
 }

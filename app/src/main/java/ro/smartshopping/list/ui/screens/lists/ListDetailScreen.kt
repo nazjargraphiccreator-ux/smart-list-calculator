@@ -414,6 +414,7 @@ fun ListDetailScreen(
     var showImportDialog by remember { mutableStateOf(false) }
     var showStoreDialog by remember { mutableStateOf(false) }
     var showBarcodeScanner by remember { mutableStateOf(false) }
+    var showWhatsAppShareDialog by remember { mutableStateOf(false) }
     var editingPriceItem by remember { mutableStateOf<ShoppingListItem?>(null) }
     var matchingDeals by remember { mutableStateOf<List<StoreDeal>>(emptyList()) }
 
@@ -512,7 +513,20 @@ fun ListDetailScreen(
                         Icon(Icons.Default.Save, contentDescription = "Salvează fișier TXT pe telefon")
                     }
 
-                    // Share
+                    // WhatsApp Share ce a rămas de cumpărat (cu iconițe)
+                    IconButton(onClick = { showWhatsAppShareDialog = true }) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF25D366).copy(alpha = 0.22f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("💬", fontSize = 16.sp)
+                        }
+                    }
+
+                    // Share general
                     IconButton(onClick = { viewModel.shareList(context) }) {
                         Icon(Icons.Default.Share, contentDescription = "Trimite")
                     }
@@ -837,6 +851,15 @@ fun ListDetailScreen(
                 viewModel.addOrUpdateProductFromBarcode(name, quantity, unit, price, barcode, putInCart = true)
             },
             onDismiss = { showBarcodeScanner = false }
+        )
+    }
+
+    // Dialog WhatsApp Share cu Iconițe (pentru ce a rămas de cumpărat)
+    if (showWhatsAppShareDialog && state.list != null) {
+        ro.smartshopping.list.ui.components.ShareWhatsAppDialog(
+            list = state.list!!,
+            items = state.items,
+            onDismissRequest = { showWhatsAppShareDialog = false }
         )
     }
 }
